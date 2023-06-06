@@ -1,0 +1,18 @@
+apiVersion: ec2.aws.crossplane.io/v1alpha1
+kind: Instance
+metadata:
+  name: ec2-instance
+spec:
+  forProvider:
+    region: us-east-1
+    imageId: ami-0dc2d3e4c0f9ebd18
+    blockDeviceMappings:
+     - deviceName: /dev/sdx
+       ebs:
+         volumeSize: 10
+    securityGroupRefs:
+      - name: ssh-sg 
+    subnetIdRef:
+      name: public-subnet
+  providerConfigRef:
+    name: default

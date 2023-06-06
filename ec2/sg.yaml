@@ -1,0 +1,19 @@
+apiVersion: ec2.aws.crossplane.io/v1beta1
+kind: SecurityGroup
+metadata:
+  name: ssh-sg
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: main-vpc  
+    groupName: ssh-sg
+    description: SG to connect to the EC2 instance
+    ingress:
+      - fromPort: 22
+        toPort: 22
+        ipProtocol: tcp
+        ipRanges:
+          - cidrIp: 0.0.0.0/0
+  providerConfigRef:
+    name: default
