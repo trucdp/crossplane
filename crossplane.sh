@@ -20,13 +20,31 @@
 # Create an account in https://cloud.upbound.io/register or https://crossplane.io/docs/v1.0/getting-started/install-configure.html#start-with-a-self-hosted-crossplane
 
 curl -sL https://raw.githubusercontent.com/crossplane/crossplane/release-1.0/install.sh | sh
-
+# Create a namespace argocd
 kubectl create namespace argocd
+# To install Non-HA v2.4.11 ArgoCD within argocd namespace run the below command:
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.11/manifests/install.yaml
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+# You can check the argocd-cm config map data entries using
+kubectl -n argocd get cm argocd-cm
+# Edit ArgoCD Server service and convert it from type ClusterIP to NodePort
+kubectl edit svc argocd-server -n argocd
+# Change type: ClusterIP to type: Nodeport and under -https add nodePort 32766 name:https and nodePort 32766
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+# Fetch the ArgoCD initial Admin Password using kubectl -n argocd get secrets argocd-initial-admin-secret -o json | jq .data.password -r | tr -d '\n' | base64 -d command.
+kubectl -n argocd get secrets argocd-initial-admin-secret -o json | jq .data.password -r | tr -d '\n'  | base64 -d
 # Read the instructions from the output to finish the installation
-
+# Install ArgoCD CLI v2.4.11.
+curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.4.11/argocd-linux-amd64
+chmod +x /usr/local/bin/argocd
 # Open https://github.com/trucdp/crossplane.git
+# HashiCorp Vault with ArgoCD Vault Plugin
+vault secrets enable -path=crds kv-v2
+vault kv put crds/mysql MYSQL-PASSWORD=12345678
+# Install AVP
+curl -Lo argocd-vault-plugin https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/{version}/argocd-vault-plugin_{version}_{linux|darwin}_{amd64|arm64|s390x}
+chmod +x argocd-vault-plugin
+mv argocd-vault-plugin /usr/local/bin
 
 # Fork it!
 
